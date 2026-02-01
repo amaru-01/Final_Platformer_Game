@@ -17,6 +17,12 @@ from src.sprites.enemy import EnemySprite
 from src.sprites.hazards import LavaHazard, WaterHazard
 from src.levels.level_data import LEVELS
 
+# Sky colors (blue sky gradient)
+SKY_TOP = (135, 206, 235)      # Light sky blue
+SKY_MID = (176, 224, 230)     # Powder blue
+SKY_BOTTOM = (100, 149, 237)  # Cornflower blue
+CLOUD_COLOR = (255, 255, 255, 220)
+
 
 class GameView(arcade.View):
     """
@@ -62,6 +68,12 @@ class GameView(arcade.View):
         # Input state
         self.move_left = False
         self.move_right = False
+
+        # Sky background: cloud positions (x, y) for simple cloud shapes
+        self._clouds = [
+            (150, 480), (400, 520), (650, 460), (850, 500),
+            (250, 380), (550, 400), (750, 350),
+        ]
 
     def setup(self, level_index: int = 0):
         """
@@ -167,9 +179,22 @@ class GameView(arcade.View):
 
     def on_draw(self):
         self.clear()
+        self._draw_sky_background()
         self.scene.draw()
-        
         self._draw_hud()
+
+    def _draw_sky_background(self):
+        """Draw blue sky gradient and clouds (behind the scene)."""
+        w, h = SCREEN_WIDTH, SCREEN_HEIGHT
+        # Gradient: 3 horizontal bands (sky blue at top to deeper blue toward bottom)
+        arcade.draw_lrbt_rectangle_filled(0, w, h * 0.6, h, SKY_TOP)
+        arcade.draw_lrbt_rectangle_filled(0, w, h * 0.3, h * 0.6, SKY_MID)
+        arcade.draw_lrbt_rectangle_filled(0, w, 0, h * 0.3, SKY_BOTTOM)
+        # Simple clouds (overlapping white ellipses)
+        for cx, cy in self._clouds:
+            arcade.draw_ellipse_filled(cx, cy, 80, 36, CLOUD_COLOR)
+            arcade.draw_ellipse_filled(cx - 35, cy - 8, 50, 28, CLOUD_COLOR)
+            arcade.draw_ellipse_filled(cx + 30, cy - 5, 45, 26, CLOUD_COLOR)
 
     def _draw_hud(self):
         hud_y = SCREEN_HEIGHT - 40
